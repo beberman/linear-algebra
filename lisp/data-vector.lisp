@@ -267,6 +267,10 @@ applying the function to each element of the vectors."
   "Return the p-norm of the vector."
   (norm-vector (contents vector) measure))
 
+(defmethod min-vector ((vector data-vector))
+  (loop for element across (contents vector) minimize (abs element)))
+
+
 (defmethod transpose ((vector column-vector))
   "Return a row vector."
   (make-instance
@@ -497,6 +501,11 @@ applying the function to each element of the vectors."
    (element-multiply-vector
     (contents vector1) (contents vector2))
    ))
+
+(defmethod elem-greater
+    ((vector1 data-vector) (vector2 data-vector))
+  (element-greater-vector
+   (contents vector1) (contents vector2)))
 
 (defmethod vec-every ((vector data-vector) predicate)
   (every predicate (contents vector)))

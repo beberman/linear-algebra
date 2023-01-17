@@ -34,6 +34,9 @@
   (:documentation
    "Dense matrix object."))
 
+(defmethod print-object ((matrix dense-matrix) stream)
+  (print-unreadable-object (matrix stream :type t :identity t)
+    (format stream "~a" (contents matrix))))
 
 (defmethod initialize-instance :after
   ((self dense-matrix) &rest initargs
@@ -495,3 +498,31 @@ matrix with a column vector."
        :contents
        (gauss-invert (contents matrix)))
       (error "The number of rows does not equal columns.")))
+
+(defmethod add-diagonal ((value number) (matrix dense-matrix))
+  (let ((result (copy-matrix matrix))
+	(num    (apply #'min (matrix-dimensions matrix)))
+	)
+    (dotimes (index num result)
+      (setf
+       (mref result index index)
+       (+ (mref matrix index index) value)))
+    result))
+
+(defmethod add-diagonal :before
+    ((vec data-vector) (matrix dense-matrix))
+  (unless (compatible-dimensions-p :solve matrix vector)
+    (error "Matrix~A is incompatible with column vector(~D)."
+           (matrix-dimensions matrix) (vector-length vector))))
+
+(defmethod add-diagonal ((vec data-vector) (matrix dense-matrix))
+  (let ((result (copy-matrix matrix))
+	(num    (min (matrix-dimensions matrix)))
+	)
+    (dotimes (index num result)
+      (setf
+       (mref result index index)
+       (+ (mref matrix index index)
+	  (vref vec index))))
+    result))
+
